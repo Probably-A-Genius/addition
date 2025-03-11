@@ -37,6 +37,12 @@
             text-align: center;
             width: 150px;
             outline: none;
+            -moz-appearance: textfield;
+        }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
         }
         button {
             background-color: limegreen;
@@ -140,9 +146,17 @@
             const fastestTime = Math.min(...times);
             const slowestTime = Math.max(...times);
 
-            localStorage.setItem('report', JSON.stringify({ meanTime, fastestTime, slowestTime, times }));
+            localStorage.setItem('report', JSON.stringify({
+                meanTime,
+                fastestTime,
+                slowestTime,
+                times,
+                problems
+            }));
+
             window.location.href = 'report.html';
         }
     </script>
 </body>
 </html>
+
