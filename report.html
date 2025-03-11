@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report</title>
+    <style>
+        body {
+            background-color: black;
+            color: limegreen;
+            font-family: monospace;
+            text-align: center;
+        }
+        h1 {
+            font-size: 3em;
+            margin-top: 20px;
+        }
+        p, li {
+            font-size: 1.5em;
+            margin: 5px 0;
+        }
+        button {
+            background-color: limegreen;
+            color: black;
+            padding: 10px 20px;
+            font-size: 1.5em;
+            border: none;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #00cc00;
+        }
+    </style>
+</head>
+<body>
+    <h1>Report</h1>
+
+    <p id="mean-time"></p>
+    <p id="fastest-time"></p>
+    <p id="slowest-time"></p>
+    <ul id="time-list"></ul>
+
+    <button onclick="goBack()">Back to Trainer</button>
+
+    <script>
+        const report = JSON.parse(localStorage.getItem('report'));
+
+        document.getElementById('mean-time').textContent = `Mean Time: ${report.meanTime.toFixed(2)}s`;
+        document.getElementById('fastest-time').textContent = `Fastest Time: ${report.fastestTime.toFixed(2)}s`;
+        document.getElementById('slowest-time').textContent = `Slowest Time: ${report.slowestTime.toFixed(2)}s`;
+
+        const timeList = document.getElementById('time-list');
+        report.times.forEach((time, i) => {
+            const li = document.createElement('li');
+            li.textContent = `Problem ${i + 1}: ${time.toFixed(2)}s`;
+            timeList.appendChild(li);
+        });
+
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
