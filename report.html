@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Report</title>
+    <title>Length Addition Trainer</title>
     <style>
         body {
             background-color: black;
@@ -13,21 +13,44 @@
         }
         h1 {
             font-size: 3em;
-            margin-top: 20px;
         }
-        p, li {
+        #settings-container, #problem-container, #result, #report-container {
+            margin-top: 30px;
+        }
+        label, input, button {
             font-size: 1.5em;
-            margin: 5px 0;
+            margin: 10px;
+        }
+        #problem-container {
+            font-size: 2.5em;
+            line-height: 1.5em;
+        }
+        .number {
+            display: block;
+        }
+        input[type="number"] {
+            background-color: black;
+            color: limegreen;
+            border: none;
+            border-bottom: 2px solid limegreen;
+            font-size: 2.5em;
+            text-align: center;
+            width: 150px;
+            outline: none;
+            -moz-appearance: textfield;
+        }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
         }
         button {
             background-color: limegreen;
             color: black;
             padding: 10px 20px;
-            font-size: 1.5em;
             border: none;
             cursor: pointer;
             transition: 0.3s;
-            margin-top: 20px;
         }
         button:hover {
             background-color: #00cc00;
@@ -35,31 +58,103 @@
     </style>
 </head>
 <body>
-    <h1>Report</h1>
+    <h1>Length Addition Trainer</h1>
 
-    <p id="mean-time"></p>
-    <p id="fastest-time"></p>
-    <p id="slowest-time"></p>
-    <ul id="time-list"></ul>
+    <div id="settings-container">
+        <label>Number of Rows:</label>
+        <input type="number" id="numRows" value="5" min="1">
+        <label>Digits per Row:</label>
+        <input type="number" id="numDigits" value="2" min="1">
+        <label>Number of Problems:</label>
+        <input type="number" id="numProblems" value="10" min="1">
+        <button onclick="startTrainer()">Start</button>
+    </div>
 
-    <button onclick="goBack()">Back to Trainer</button>
+    <div id="problem-container" style="display: none;"></div>
 
     <script>
-        const report = JSON.parse(localStorage.getItem('report'));
+        let problems = [];
+        let currentProblem = 0;
+        let startTime;
+        let times = [];
 
-        document.getElementById('mean-time').textContent = `Mean Time: ${report.meanTime.toFixed(2)}s`;
-        document.getElementById('fastest-time').textContent = `Fastest Time: ${report.fastestTime.toFixed(2)}s`;
-        document.getElementById('slowest-time').textContent = `Slowest Time: ${report.slowestTime.toFixed(2)}s`;
+        function generateProblem(rows, digits) {
+            let problem = [];
+            for (let i = 0; i < rows; i++) {
+                let number = "";
+                for (let j = 0; j < digits; j++) {
+                    number += Math.floor(Math.random() * 10);
+                }
+                problem.push(Number(number));
+            }
+            return problem;
+        }
 
-        const timeList = document.getElementById('time-list');
-        report.times.forEach((time, i) => {
-            const li = document.createElement('li');
-            li.textContent = `Problem ${i + 1}: ${time.toFixed(2)}s`;
-            timeList.appendChild(li);
-        });
+        function displayProblem() {
+            const container = document.getElementById('problem-container');
+            container.innerHTML = '';
+            container.style.display = 'block';
 
-        function goBack() {
-            window.location.href = 'index.html';
+            problems[currentProblem].forEach(num => {
+                const div = document.createElement('div');
+                div.className = 'number';
+                div.textContent = num;
+                container.appendChild(div);
+            });
+
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.oninput = checkAnswer;
+            container.appendChild(input);
+            input.focus();
+
+            startTime = Date.now();
+        }
+
+        function checkAnswer(e) {
+            const answer = parseInt(e.target.value);
+            const correctAnswer = problems[currentProblem].reduce((a, b) => a + b, 0);
+
+            if (answer === correctAnswer) {
+                const endTime = Date.now();
+                times.push((endTime - startTime) / 1000);
+
+                currentProblem++;
+                if (currentProblem < problems.length) {
+                    displayProblem();
+                } else {
+                    showReport();
+                }
+            }
+        }
+
+        function startTrainer() {
+            const numRows = parseInt(document.getElementById('numRows').value);
+            const numDigits = parseInt(document.getElementById('numDigits').value);
+            const numProblems = parseInt(document.getElementById('numProblems').value);
+
+            problems = Array.from({ length: numProblems }, () => generateProblem(numRows, numDigits));
+            currentProblem = 0;
+            times = [];
+
+            document.getElementById('settings-container').style.display = 'none';
+            displayProblem();
+        }
+
+        function showReport() {
+            const meanTime = times.reduce((a, b) => a + b, 0) / times.length;
+            const fastestTime = Math.min(...times);
+            const slowestTime = Math.max(...times);
+
+            localStorage.setItem('report', JSON.stringify({
+                meanTime,
+                fastestTime,
+                slowestTime,
+                times,
+                problems
+            }));
+
+            window.location.href = 'report.html';
         }
     </script>
 </body>
